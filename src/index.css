@@ -33,9 +33,9 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   background: 
-    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(0, 245, 255, 0.02) 0%, transparent 60%),
-    radial-gradient(ellipse 100% 60% at 0% 100%, rgba(138, 43, 226, 0.02) 0%, transparent 70%),
-    radial-gradient(ellipse 90% 70% at 100% 50%, rgba(255, 20, 147, 0.015) 0%, transparent 60%),
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(0, 245, 255, 0.03) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 60% at 0% 100%, rgba(138, 43, 226, 0.03) 0%, transparent 70%),
+    radial-gradient(ellipse 90% 70% at 100% 50%, rgba(255, 20, 147, 0.025) 0%, transparent 60%),
     linear-gradient(180deg, #000814 0%, #001d3d 30%, #003566 50%, #001d3d 70%, #000814 100%);
   background-attachment: fixed;
   color: white;
@@ -43,6 +43,8 @@ body {
   overflow-y: auto;
   min-height: 100vh;
   position: relative;
+  perspective: 2000px;
+  transform-style: preserve-3d;
 }
 
 /* Scrollbar styling */
@@ -599,27 +601,32 @@ body {
   animation: float-particle linear infinite;
 }
 
-/* Simplified Grid System */
+/* Advanced 3D Grid System */
 .futuristic-grid {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  perspective: 1500px;
   pointer-events: none;
   z-index: -1;
-  opacity: 0.6;
+  overflow: hidden;
 }
 
 .grid-3d {
   position: absolute;
-  width: 100%;
-  height: 100%;
+  width: 150%;
+  height: 150%;
+  top: -25%;
+  left: -25%;
+  transform-style: preserve-3d;
+  animation: rotate3DGrid 40s linear infinite;
   background: 
-    linear-gradient(90deg, rgba(0, 245, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(rgba(0, 245, 255, 0.04) 1px, transparent 1px);
-  background-size: 50px 50px;
-  animation: gridFloat 20s ease-in-out infinite;
+    linear-gradient(90deg, rgba(0, 245, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(rgba(0, 245, 255, 0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  transform: rotateX(75deg) rotateZ(0deg);
 }
 
 .grid-3d::before {
@@ -628,20 +635,194 @@ body {
   width: 100%;
   height: 100%;
   background: 
-    linear-gradient(45deg, rgba(138, 43, 226, 0.02) 1px, transparent 1px),
-    linear-gradient(-45deg, rgba(138, 43, 226, 0.02) 1px, transparent 1px);
-  background-size: 80px 80px;
-  animation: gridFloat 25s ease-in-out infinite reverse;
+    linear-gradient(90deg, rgba(138, 43, 226, 0.04) 1px, transparent 1px),
+    linear-gradient(rgba(138, 43, 226, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  transform: translateZ(-150px) rotateY(45deg);
+  animation: rotate3DGridReverse 30s linear infinite;
 }
 
-@keyframes gridFloat {
+.grid-3d::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: 
+    linear-gradient(90deg, rgba(255, 20, 147, 0.03) 1px, transparent 1px),
+    linear-gradient(rgba(255, 20, 147, 0.03) 1px, transparent 1px);
+  background-size: 100px 100px;
+  transform: translateZ(-300px) rotateX(45deg);
+  animation: rotate3DGrid 50s linear infinite reverse;
+}
+
+@keyframes rotate3DGrid {
+  0% { transform: rotateX(75deg) rotateZ(0deg) rotateY(0deg); }
+  100% { transform: rotateX(75deg) rotateZ(0deg) rotateY(360deg); }
+}
+
+@keyframes rotate3DGridReverse {
+  0% { transform: translateZ(-150px) rotateY(45deg) rotateZ(360deg); }
+  100% { transform: translateZ(-150px) rotateY(45deg) rotateZ(0deg); }
+}
+
+/* 3D Floating Data Cubes */
+.data-cubes {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  perspective: 2000px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.data-cube {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  transform-style: preserve-3d;
+  animation: floatCube3D 20s ease-in-out infinite;
+}
+
+.cube-face {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  background: rgba(0, 245, 255, 0.05);
+  backdrop-filter: blur(5px);
+}
+
+.cube-face.front { transform: translateZ(15px); }
+.cube-face.back { transform: translateZ(-15px) rotateY(180deg); }
+.cube-face.right { transform: rotateY(90deg) translateZ(15px); }
+.cube-face.left { transform: rotateY(-90deg) translateZ(15px); }
+.cube-face.top { transform: rotateX(90deg) translateZ(15px); }
+.cube-face.bottom { transform: rotateX(-90deg) translateZ(15px); }
+
+@keyframes floatCube3D {
   0%, 100% { 
+    transform: translateZ(0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
     opacity: 0.3;
-    transform: translateY(0px);
+  }
+  25% { 
+    transform: translateZ(200px) rotateX(90deg) rotateY(180deg) rotateZ(90deg);
+    opacity: 0.7;
   }
   50% { 
+    transform: translateZ(400px) rotateX(180deg) rotateY(360deg) rotateZ(180deg);
+    opacity: 0.5;
+  }
+  75% { 
+    transform: translateZ(200px) rotateX(270deg) rotateY(540deg) rotateZ(270deg);
+    opacity: 0.8;
+  }
+}
+
+/* 3D Energy Rings */
+.energy-rings {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  perspective: 1800px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.energy-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid;
+  transform-style: preserve-3d;
+  animation: rotateRing3D 15s linear infinite;
+}
+
+.energy-ring.ring-1 {
+  width: 200px;
+  height: 200px;
+  border-color: rgba(0, 245, 255, 0.4);
+  top: 20%;
+  left: 10%;
+  animation-duration: 25s;
+}
+
+.energy-ring.ring-2 {
+  width: 150px;
+  height: 150px;
+  border-color: rgba(138, 43, 226, 0.4);
+  top: 60%;
+  right: 15%;
+  animation-duration: 20s;
+  animation-direction: reverse;
+}
+
+.energy-ring.ring-3 {
+  width: 180px;
+  height: 180px;
+  border-color: rgba(255, 20, 147, 0.4);
+  bottom: 20%;
+  left: 30%;
+  animation-duration: 30s;
+}
+
+@keyframes rotateRing3D {
+  0% { transform: rotateX(60deg) rotateY(0deg) rotateZ(0deg); }
+  33% { transform: rotateX(60deg) rotateY(120deg) rotateZ(40deg); }
+  66% { transform: rotateX(60deg) rotateY(240deg) rotateZ(-40deg); }
+  100% { transform: rotateX(60deg) rotateY(360deg) rotateZ(0deg); }
+}
+
+/* Floating Particle System */
+.particle-system {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  perspective: 1200px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.particle-3d {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 245, 255, 0.8), rgba(0, 245, 255, 0.2));
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+  animation: floatParticle3D 25s ease-in-out infinite;
+}
+
+.particle-3d.purple {
+  background: radial-gradient(circle, rgba(138, 43, 226, 0.8), rgba(138, 43, 226, 0.2));
+  box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+.particle-3d.pink {
+  background: radial-gradient(circle, rgba(255, 20, 147, 0.8), rgba(255, 20, 147, 0.2));
+  box-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
+}
+
+@keyframes floatParticle3D {
+  0%, 100% { 
+    transform: translate3d(0px, 0px, 0px) rotateY(0deg);
+    opacity: 0.4;
+  }
+  25% { 
+    transform: translate3d(100px, -150px, 300px) rotateY(90deg);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: translate3d(-50px, 200px, 500px) rotateY(180deg);
     opacity: 0.6;
-    transform: translateY(-10px);
+  }
+  75% { 
+    transform: translate3d(150px, -100px, 200px) rotateY(270deg);
+    opacity: 0.9;
   }
 }
 

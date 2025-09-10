@@ -220,8 +220,12 @@ const GameInterface: React.FC = () => {
                   whileTap={{ scale: 0.98 }}
                 >
                   <div className="font-bold">{amount} SHM</div>
-                  <div className="text-xs text-gray-400">
-                    Win: {(parseFloat(amount) * 2).toFixed(2)} SHM
+                  <div className={`text-xs font-semibold ${
+                    betAmount === amount 
+                      ? 'text-neon-blue/90' 
+                      : 'text-white/80'
+                  }`}>
+                    WIN: {(parseFloat(amount) * 2).toFixed(2)} SHM
                   </div>
                 </motion.button>
               ))}

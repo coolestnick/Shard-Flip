@@ -131,19 +131,19 @@ const Header: React.FC = () => {
                 
                 <motion.button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="glass-dark px-4 py-2 rounded-lg flex items-center space-x-3 hover:bg-white/20 transition-colors"
-                  whileHover={{ scale: 1.02 }}
+                  className="glass-dark px-4 py-2 rounded-xl flex items-center space-x-3 hover:bg-white/20 transition-all duration-300 border border-neon-blue/30 hover:border-neon-blue/60 shadow-lg shadow-neon-blue/20 hover:shadow-neon-blue/40"
+                  whileHover={{ scale: 1.02, y: -1 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <div className="flex flex-col items-end">
-                    <span className="text-sm font-medium text-white">
+                    <span className="text-sm font-bold text-white">
                       {formatBalance(wallet.balance)} SHM
                     </span>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-neon-blue/80 font-medium">
                       {formatAddress(wallet.address!)}
                     </span>
                   </div>
-                  <div className="w-8 h-8 bg-gradient-to-r from-neon-blue to-neon-purple rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink rounded-full flex items-center justify-center shadow-lg shadow-neon-blue/50 animate-pulse">
                     <span className="text-sm font-bold text-white">
                       {wallet.address?.slice(2, 4).toUpperCase()}
                     </span>
@@ -165,66 +165,156 @@ const Header: React.FC = () => {
                       initial={{ opacity: 0, y: -10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      className="absolute right-0 top-full mt-2 w-64 glass-dark rounded-lg border border-white/20 py-2 z-50"
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                      className="absolute right-0 top-full mt-2 w-56 glass-dark rounded-xl border border-neon-blue/30 py-2 z-50 shadow-2xl shadow-neon-blue/20 backdrop-blur-xl"
                     >
-                      <div className="px-4 py-3 border-b border-white/10">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-r from-neon-blue to-neon-purple rounded-full flex items-center justify-center">
-                            <span className="text-sm font-bold text-white">
+                      <div className="px-3 py-2 border-b border-neon-blue/20">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-8 h-8 bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink rounded-full flex items-center justify-center shadow-lg shadow-neon-blue/50 animate-pulse">
+                            <span className="text-xs font-bold text-white">
                               {wallet.address?.slice(2, 4).toUpperCase()}
                             </span>
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-white">
+                          <div className="flex-1">
+                            <p className="text-xs font-bold text-white mb-0.5">
                               {formatAddress(wallet.address!)}
                             </p>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs font-bold text-neon-green">
                               {formatBalance(wallet.balance)} SHM
                             </p>
+                          </div>
+                          <div className="text-right">
+                            <div className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></div>
                           </div>
                         </div>
                       </div>
                       
-                      <div className="py-2">
-                        <a
+                      <div className="py-2 space-y-1">
+                        {/* View on Explorer Button */}
+                        <motion.a
                           href={`${SHARDEUM_UNSTABLE.explorerUrl}/address/${wallet.address}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-300 hover:bg-white/10 transition-colors"
+                          className="group relative mx-2 block"
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                          <span>View on Explorer</span>
-                        </a>
+                          <div className="absolute inset-0 bg-gradient-to-r from-neon-blue/15 to-neon-blue/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                          <div className="relative flex items-center space-x-3 px-3 py-2.5 rounded-lg border border-transparent group-hover:border-neon-blue/30 transition-all duration-200">
+                            <div className="w-8 h-8 bg-gradient-to-br from-neon-blue/25 to-neon-blue/10 rounded-lg flex items-center justify-center group-hover:shadow-md group-hover:shadow-neon-blue/20 transition-all duration-200">
+                              <svg className="w-4 h-4 text-neon-blue group-hover:scale-105 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-xs font-semibold text-white group-hover:text-neon-blue transition-colors duration-200">View on Explorer</p>
+                            </div>
+                            <div className="w-5 h-5 rounded-full bg-neon-blue/10 flex items-center justify-center group-hover:bg-neon-blue/20 transition-all duration-200">
+                              <svg className="w-2.5 h-2.5 text-neon-blue/60 group-hover:text-neon-blue group-hover:translate-x-0.5 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </div>
+                          </div>
+                        </motion.a>
                         
-                        <button
+                        {/* Copy Address Button */}
+                        <motion.button
                           onClick={() => {
                             navigator.clipboard.writeText(wallet.address!);
                             setShowDropdown(false);
                           }}
-                          className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-300 hover:bg-white/10 transition-colors w-full text-left"
+                          className="group relative mx-2 block"
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                          <span>Copy Address</span>
-                        </button>
+                          <div className="absolute inset-0 bg-gradient-to-r from-neon-purple/15 to-neon-pink/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                          <div className="relative flex items-center space-x-3 px-3 py-2.5 rounded-lg border border-transparent group-hover:border-neon-purple/30 transition-all duration-200">
+                            <div className="w-8 h-8 bg-gradient-to-br from-neon-purple/25 to-neon-pink/10 rounded-lg flex items-center justify-center group-hover:shadow-md group-hover:shadow-neon-purple/20 transition-all duration-200">
+                              <svg className="w-4 h-4 text-neon-purple group-hover:scale-105 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-xs font-semibold text-white group-hover:text-neon-purple transition-colors duration-200">Copy Address</p>
+                            </div>
+                            <div className="w-5 h-5 rounded-full bg-neon-purple/10 flex items-center justify-center group-hover:bg-neon-purple/20 transition-all duration-200">
+                              <svg className="w-2.5 h-2.5 text-neon-purple/60 group-hover:text-neon-purple group-hover:translate-x-0.5 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </div>
+                          </div>
+                        </motion.button>
 
-                        <div className="border-t border-white/10 my-2"></div>
+                        {/* Elegant Divider */}
+                        <div className="mx-4 my-3 relative">
+                          <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gradient-to-r from-transparent via-neon-blue/30 to-transparent"></div>
+                          </div>
+                          <div className="relative flex justify-center">
+                            <div className="w-1.5 h-1.5 bg-neon-blue/50 rounded-full animate-pulse"></div>
+                          </div>
+                        </div>
 
-                        <button
+                        {/* Disconnect Button */}
+                        <motion.button
                           onClick={() => {
                             disconnectWallet();
                             setShowDropdown(false);
                           }}
-                          className="flex items-center space-x-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors w-full text-left"
+                          className="group relative mx-2 block"
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                          </svg>
-                          <span>Disconnect</span>
-                        </button>
+                          <div className="absolute inset-0 bg-gradient-to-r from-red-500/15 to-red-600/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                          <div className="relative flex items-center space-x-3 px-3 py-2.5 rounded-lg border border-transparent group-hover:border-red-500/30 transition-all duration-200">
+                            <div className="w-8 h-8 bg-gradient-to-br from-red-500/25 to-red-600/10 rounded-lg flex items-center justify-center group-hover:shadow-md group-hover:shadow-red-500/20 transition-all duration-200">
+                              <svg className="w-4 h-4 text-red-400 group-hover:scale-105 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-xs font-semibold text-white group-hover:text-red-400 transition-colors duration-200">Disconnect</p>
+                            </div>
+                            <div className="w-5 h-5 rounded-full bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-all duration-200">
+                              <svg className="w-2.5 h-2.5 text-red-400/60 group-hover:text-red-400 group-hover:translate-x-0.5 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </div>
+                          </div>
+                        </motion.button>
+
+                        {/* Additional Quick Actions */}
+                        <div className="pt-2">
+                          <p className="text-xs text-gray-500 px-4 mb-2 font-medium uppercase tracking-wider">Quick Actions</p>
+                          <div className="flex space-x-2 px-2">
+                            <motion.button
+                              onClick={() => setShowDropdown(false)}
+                              className="flex-1 flex items-center justify-center space-x-1 py-2 px-2 rounded-lg bg-neon-blue/10 hover:bg-neon-blue/20 border border-neon-blue/20 hover:border-neon-blue/40 transition-all duration-200 group"
+                              whileHover={{ scale: 1.01 }}
+                              whileTap={{ scale: 0.99 }}
+                            >
+                              <svg className="w-3.5 h-3.5 text-neon-blue group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                              <span className="text-xs font-semibold text-neon-blue">Refresh</span>
+                            </motion.button>
+                            
+                            <motion.button
+                              onClick={() => {
+                                window.open(`${SHARDEUM_UNSTABLE.explorerUrl}/address/${wallet.address}`, '_blank');
+                                setShowDropdown(false);
+                              }}
+                              className="flex-1 flex items-center justify-center space-x-1 py-2 px-2 rounded-lg bg-neon-purple/10 hover:bg-neon-purple/20 border border-neon-purple/20 hover:border-neon-purple/40 transition-all duration-200 group"
+                              whileHover={{ scale: 1.01 }}
+                              whileTap={{ scale: 0.99 }}
+                            >
+                              <svg className="w-3.5 h-3.5 text-neon-purple group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                              </svg>
+                              <span className="text-xs font-semibold text-neon-purple">Stats</span>
+                            </motion.button>
+                          </div>
+                        </div>
                       </div>
                     </motion.div>
                   )}

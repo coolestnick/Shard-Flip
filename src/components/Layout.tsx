@@ -10,85 +10,110 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen text-white relative overflow-x-hidden">
-      {/* Futuristic 3D Grid System */}
+      {/* 3D Rotating Grid System */}
       <div className="futuristic-grid">
         <div className="grid-3d"></div>
       </div>
 
-      {/* Holographic Scanlines */}
-      <div className="scanlines"></div>
-      
-      {/* Simplified Floating Elements */}
+      {/* 3D Data Cubes */}
+      <div className="data-cubes">
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={`cube-${i}`}
+            className="data-cube"
+            style={{
+              left: `${10 + i * 15}%`,
+              top: `${20 + i * 12}%`,
+              animationDelay: `${i * 3}s`,
+              animationDuration: `${20 + i * 5}s`
+            }}
+          >
+            <div className="cube-face front"></div>
+            <div className="cube-face back"></div>
+            <div className="cube-face right"></div>
+            <div className="cube-face left"></div>
+            <div className="cube-face top"></div>
+            <div className="cube-face bottom"></div>
+          </div>
+        ))}
+      </div>
+
+      {/* 3D Energy Rings */}
+      <div className="energy-rings">
+        <div className="energy-ring ring-1"></div>
+        <div className="energy-ring ring-2"></div>
+        <div className="energy-ring ring-3"></div>
+      </div>
+
+      {/* 3D Particle System */}
+      <div className="particle-system">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={`particle-${i}`}
+            className={`particle-3d ${
+              i % 3 === 0 ? '' : i % 3 === 1 ? 'purple' : 'pink'
+            }`}
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${i * 1.2}s`,
+              animationDuration: `${20 + i * 2}s`
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Advanced Floating Elements */}
       <div className="geometric-shapes">
-        {/* Floating Spheres */}
-        {[...Array(3)].map((_, i) => (
+        {/* Animated Spheres with 3D movement */}
+        {[...Array(4)].map((_, i) => (
           <motion.div
             key={`sphere-${i}`}
             className="shape-3d sphere"
             style={{
-              left: `${15 + i * 30}%`,
-              top: `${25 + i * 20}%`,
-              width: '20px',
-              height: '20px',
+              left: `${15 + i * 20}%`,
+              top: `${25 + i * 15}%`,
+              width: '16px',
+              height: '16px',
               borderRadius: '50%',
               background: `radial-gradient(circle at 30% 30%, 
-                ${i === 0 ? 'rgba(0, 245, 255, 0.6)' : 
-                  i === 1 ? 'rgba(138, 43, 226, 0.6)' : 
-                  'rgba(255, 20, 147, 0.6)'
+                ${i % 3 === 0 ? 'rgba(0, 245, 255, 0.8)' : 
+                  i % 3 === 1 ? 'rgba(138, 43, 226, 0.8)' : 
+                  'rgba(255, 20, 147, 0.8)'
                 }, 
-                ${i === 0 ? 'rgba(0, 245, 255, 0.1)' : 
-                  i === 1 ? 'rgba(138, 43, 226, 0.1)' : 
-                  'rgba(255, 20, 147, 0.1)'
+                ${i % 3 === 0 ? 'rgba(0, 245, 255, 0.2)' : 
+                  i % 3 === 1 ? 'rgba(138, 43, 226, 0.2)' : 
+                  'rgba(255, 20, 147, 0.2)'
                 }
               )`,
               boxShadow: `0 0 20px ${
-                i === 0 ? 'rgba(0, 245, 255, 0.3)' : 
-                i === 1 ? 'rgba(138, 43, 226, 0.3)' : 
-                'rgba(255, 20, 147, 0.3)'
+                i % 3 === 0 ? 'rgba(0, 245, 255, 0.4)' : 
+                i % 3 === 1 ? 'rgba(138, 43, 226, 0.4)' : 
+                'rgba(255, 20, 147, 0.4)'
               }`
             }}
             animate={{
-              y: [0, -20, 0],
-              scale: [1, 1.2, 1],
-              opacity: [0.4, 0.8, 0.4],
+              x: [0, Math.sin(i) * 50, -Math.cos(i) * 30, 0],
+              y: [0, -Math.cos(i) * 40, Math.sin(i) * 25, 0],
+              z: [0, 100, 200, 50, 0],
+              scale: [1, 1.3, 0.8, 1.1, 1],
+              rotateY: [0, 180, 360],
+              opacity: [0.5, 0.9, 0.3, 0.7, 0.5],
             }}
             transition={{
-              duration: 8 + i * 2,
+              duration: 18 + i * 3,
               repeat: Infinity,
               ease: "easeInOut",
               delay: i * 2,
             }}
           />
         ))}
-
-        {/* Simple Energy Ring */}
-        <motion.div
-          className="shape-3d"
-          style={{
-            left: '50%',
-            top: '60%',
-            width: '80px',
-            height: '80px',
-            border: '1px solid rgba(0, 245, 255, 0.3)',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, transparent 70%, rgba(0, 245, 255, 0.05) 100%)',
-            boxShadow: '0 0 30px rgba(0, 245, 255, 0.2)',
-            transform: 'translate(-50%, -50%)'
-          }}
-          animate={{
-            rotate: [0, 360],
-            scale: [1, 1.1, 1],
-            opacity: [0.3, 0.6, 0.3],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
       </div>
+
+      {/* Holographic Scanlines */}
+      <div className="scanlines"></div>
       
-      {/* Particle Background */}
+      {/* Original Particle Background */}
       <ParticleBackground />
 
       {/* Main Content */}
