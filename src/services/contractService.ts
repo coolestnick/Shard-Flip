@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { GameResult, PlayerStats, GameStats, LeaderboardEntry, CoinSide } from '../types';
 import { CONTRACT_ABI, SHARDEUM_UNSTABLE } from '../utils/constants';
+import { apiService } from './apiService';
 import toast from 'react-hot-toast';
 
 export class ContractService {
@@ -91,6 +92,25 @@ export class ContractService {
       
       if (receipt && receipt.status === 1) {
         toast.success('Coin flip completed!');
+        
+        // Get the game result from transaction receipt
+        const gameResult = await this.parseGameResultFromReceipt(receipt);
+        
+        // Update backend with game result
+        if (gameResult && this.signer) {
+          try {
+            const playerAddress = await this.signer.getAddress();
+            await apiService.updateGameResult(
+              playerAddress,
+              gameResult.won ? 'win' : 'loss',
+              parseFloat(ethers.formatEther(gameResult.betAmount)),
+              gameResult.won ? parseFloat(ethers.formatEther(gameResult.payout)) : 0
+            );
+          } catch (backendError) {
+            console.error('Failed to update backend with game result:', backendError);
+          }
+        }
+        
         return { success: true, txHash: tx.hash };
       } else {
         throw new Error('Transaction failed');
@@ -324,6 +344,38 @@ export class ContractService {
     this.contract = null;
     this.provider = null;
     this.signer = null;
+  }
+
+  // Helper method to parse game result from transaction receipt
+  private async parseGameResultFromReceipt(receipt: any): Promise<{ won: boolean; betAmount: bigint; payout: bigint } | null> {
+    if (!this.contract) return null;
+
+    try {
+      // Look for GamePlayed events in the receipt
+      const gamePlayedFilter = this.contract.filters.GamePlayed();
+      const logs = receipt.logs;
+      
+      for (const log of logs) {
+        try {
+          const parsedLog = this.contract.interface.parseLog(log);
+          if (parsedLog && parsedLog.name === 'GamePlayed') {
+            return {
+              won: parsedLog.args.won,
+              betAmount: parsedLog.args.betAmount,
+              payout: parsedLog.args.payout
+            };
+          }
+        } catch (e) {
+          // Skip logs that don't match our contract interface
+          continue;
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error parsing game result from receipt:', error);
+      return null;
+    }
   }
 }
 

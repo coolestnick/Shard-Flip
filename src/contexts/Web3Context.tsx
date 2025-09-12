@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { ethers } from 'ethers';
 import { WalletState, NetworkConfig } from '../types';
 import { SHARDEUM_UNSTABLE } from '../utils/constants';
+import { apiService } from '../services/apiService';
 import toast from 'react-hot-toast';
 
 interface Web3ContextType {
@@ -148,6 +149,18 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       
       // Store connection state
       localStorage.setItem('walletConnected', 'true');
+
+      // Register wallet with backend
+      try {
+        const registerResult = await apiService.registerWallet(address);
+        if (registerResult.success) {
+          console.log('Wallet registered with backend:', registerResult.message);
+        } else {
+          console.warn('Failed to register wallet:', registerResult.error);
+        }
+      } catch (error) {
+        console.error('Error registering wallet with backend:', error);
+      }
       
     } catch (error: any) {
       console.error('Error connecting wallet:', error);
