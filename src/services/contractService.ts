@@ -60,7 +60,7 @@ export class ContractService {
       // Check contract balance for potential payout
       const contractBalance = await this.contract!.getContractBalance();
       const payoutMultiplier = await this.contract!.PAYOUT_MULTIPLIER();
-      const potentialPayout = betAmount * payoutMultiplier / 100n;
+      const potentialPayout = betAmount * payoutMultiplier / BigInt(100);
       
       if (contractBalance < potentialPayout) {
         throw new Error('Contract has insufficient balance for this bet');
@@ -78,10 +78,10 @@ export class ContractService {
         const gasEstimate = await this.contract!.flipCoin.estimateGas(choiceBool, {
           value: betAmount
         });
-        gasLimit = gasEstimate * 150n / 100n; // 50% buffer
+        gasLimit = gasEstimate * BigInt(150) / BigInt(100); // 50% buffer
       } catch (gasError) {
         console.warn('Gas estimation failed, using fallback:', gasError);
-        gasLimit = 500000n; // Fallback gas limit
+        gasLimit = BigInt(500000); // Fallback gas limit
       }
 
       // Get current gas price
@@ -103,14 +103,23 @@ export class ContractService {
         // Get the game result from transaction receipt
         const gameResult = await this.parseGameResultFromReceipt(receipt);
         
-        // Update backend with game result
+        // Always attempt backend update after successful transaction
         if (this.signer) {
+          const playerAddress = await this.signer.getAddress();
+          console.log('🎮 Updating backend for successful game by:', playerAddress);
+          console.log('💰 Bet amount:', betInfo.amount, 'SHM');
+          
           try {
-            const playerAddress = await this.signer.getAddress();
-            console.log('🎮 Attempting to update backend for player:', playerAddress);
+            // First, get the actual game result from the blockchain
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s for blockchain to update
             
             if (gameResult) {
-              console.log('📊 Game result from receipt:', gameResult);
+              console.log('📊 Parsed game result:', {
+                won: gameResult.won,
+                betAmount: ethers.formatEther(gameResult.betAmount),
+                payout: ethers.formatEther(gameResult.payout)
+              });
+              
               const result = await apiService.updateGameResult(
                 playerAddress,
                 gameResult.won ? 'win' : 'loss',
@@ -119,19 +128,46 @@ export class ContractService {
               );
               console.log('✅ Backend update result:', result);
             } else {
-              // Fallback: Register that a game was played (we'll get the result later from contract)
-              console.log('⚠️ Could not parse game result, registering game activity');
+              console.log('⚠️ Could not parse game result from receipt, checking contract directly...');
               
-              // Just register that the wallet played a game
+              // Fallback: Check contract for recent games
               try {
-                await apiService.registerWallet(playerAddress);
-                console.log('✅ Wallet activity registered as fallback');
-              } catch (registerError) {
-                console.error('Failed to register wallet activity:', registerError);
+                const recentGames = await this.getRecentGames(5);
+                const playerGame = recentGames.find(game => 
+                  game.player.toLowerCase() === playerAddress.toLowerCase() &&
+                  Math.abs(parseFloat(game.betAmount) - betInfo.amount) < 0.001
+                );
+                
+                if (playerGame) {
+                  console.log('🎯 Found matching game in contract:', playerGame);
+                  const result = await apiService.updateGameResult(
+                    playerAddress,
+                    playerGame.won ? 'win' : 'loss',
+                    parseFloat(playerGame.betAmount),
+                    parseFloat(playerGame.payout)
+                  );
+                  console.log('✅ Backend updated from contract data:', result);
+                } else {
+                  console.log('🔍 No matching game found, using bet amount as fallback');
+                  // Last resort: assume loss if we can't determine result
+                  const result = await apiService.updateGameResult(
+                    playerAddress,
+                    'loss', // Conservative assumption
+                    betInfo.amount,
+                    0
+                  );
+                  console.log('✅ Backend updated with fallback (assumed loss):', result);
+                }
+              } catch (contractError) {
+                console.error('Failed to get game from contract:', contractError);
               }
             }
           } catch (backendError) {
-            console.error('❌ Failed to update backend with game result:', backendError);
+            console.error('❌ Failed to update backend:', backendError);
+            console.log('🔧 Backend error details:', {
+              url: process.env.REACT_APP_API_URL,
+              hasApiKey: !!process.env.REACT_APP_API_SECRET_KEY
+            });
           }
         }
         
@@ -376,7 +412,6 @@ export class ContractService {
 
     try {
       // Look for GamePlayed events in the receipt
-      const gamePlayedFilter = this.contract.filters.GamePlayed();
       const logs = receipt.logs;
       
       for (const log of logs) {

@@ -1,6 +1,14 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://shard-flip-9nvm.vercel.app/api';
 const API_SECRET_KEY = process.env.REACT_APP_API_SECRET_KEY;
 
+// Debug environment variables
+console.log('🔧 API Service Config:', {
+  baseUrl: API_BASE_URL,
+  hasApiKey: !!API_SECRET_KEY,
+  envApiUrl: process.env.REACT_APP_API_URL,
+  envHasKey: !!process.env.REACT_APP_API_SECRET_KEY
+});
+
 interface ApiResponse<T = any> {
   success: boolean;
   message?: string;

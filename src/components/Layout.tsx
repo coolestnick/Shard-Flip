@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Header from './Header';
 import ParticleBackground from './ParticleBackground';
+import ApiTest from './ApiTest';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -198,6 +199,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </motion.p>
         </div>
       </motion.div>
+
+      {/* API Test Panel - Only show in development */}
+      {process.env.NODE_ENV === 'development' && <ApiTest />}
     </div>
   );
 };
