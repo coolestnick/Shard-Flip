@@ -37,6 +37,13 @@ export class ContractService {
     try {
       const betAmount = ethers.parseEther(amount);
       const choiceBool = choice === 'heads'; // true for heads, false for tails
+      
+      // Store bet info for fallback update
+      const betInfo = {
+        amount: parseFloat(amount),
+        choice: choice,
+        player: this.signer ? await this.signer.getAddress() : null
+      };
 
       // Check minimum bet amount
       const minBet = await this.contract!.MIN_BET();
@@ -97,17 +104,34 @@ export class ContractService {
         const gameResult = await this.parseGameResultFromReceipt(receipt);
         
         // Update backend with game result
-        if (gameResult && this.signer) {
+        if (this.signer) {
           try {
             const playerAddress = await this.signer.getAddress();
-            await apiService.updateGameResult(
-              playerAddress,
-              gameResult.won ? 'win' : 'loss',
-              parseFloat(ethers.formatEther(gameResult.betAmount)),
-              gameResult.won ? parseFloat(ethers.formatEther(gameResult.payout)) : 0
-            );
+            console.log('🎮 Attempting to update backend for player:', playerAddress);
+            
+            if (gameResult) {
+              console.log('📊 Game result from receipt:', gameResult);
+              const result = await apiService.updateGameResult(
+                playerAddress,
+                gameResult.won ? 'win' : 'loss',
+                parseFloat(ethers.formatEther(gameResult.betAmount)),
+                gameResult.won ? parseFloat(ethers.formatEther(gameResult.payout)) : 0
+              );
+              console.log('✅ Backend update result:', result);
+            } else {
+              // Fallback: Register that a game was played (we'll get the result later from contract)
+              console.log('⚠️ Could not parse game result, registering game activity');
+              
+              // Just register that the wallet played a game
+              try {
+                await apiService.registerWallet(playerAddress);
+                console.log('✅ Wallet activity registered as fallback');
+              } catch (registerError) {
+                console.error('Failed to register wallet activity:', registerError);
+              }
+            }
           } catch (backendError) {
-            console.error('Failed to update backend with game result:', backendError);
+            console.error('❌ Failed to update backend with game result:', backendError);
           }
         }
         

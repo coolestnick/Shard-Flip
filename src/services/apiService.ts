@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://shard-flip.vercel.app/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://shard-flip-9nvm.vercel.app/api';
 const API_SECRET_KEY = process.env.REACT_APP_API_SECRET_KEY;
 
 interface ApiResponse<T = any> {
@@ -53,6 +53,7 @@ class ApiService {
   ): Promise<ApiResponse<T>> {
     try {
       const url = `${API_BASE_URL}${endpoint}`;
+      console.log('🔗 API Request:', options.method || 'GET', url);
       
       const defaultHeaders: HeadersInit = {
         'Content-Type': 'application/json',
@@ -61,6 +62,9 @@ class ApiService {
       // Add API key for POST requests
       if (options.method === 'POST' && API_SECRET_KEY) {
         defaultHeaders['x-api-key'] = API_SECRET_KEY;
+        console.log('🔑 API key added to request');
+      } else if (options.method === 'POST') {
+        console.warn('⚠️ No API key found for POST request!');
       }
 
       const response = await fetch(url, {
