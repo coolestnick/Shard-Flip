@@ -393,6 +393,58 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Admin endpoint to reset user (temporary - for development)
+app.post('/api/admin/reset-user', validateSecretKey, async (req, res) => {
+  try {
+    const { walletAddress } = req.body;
+    
+    if (!walletAddress) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Wallet address is required' 
+      });
+    }
+
+    const user = await User.findOne({ walletAddress: walletAddress.toLowerCase() });
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'User not found' 
+      });
+    }
+
+    // Reset user to initial state
+    user.hasPlayedGame = false;
+    user.totalGamesPlayed = 0;
+    user.totalWins = 0;
+    user.totalLosses = 0;
+    user.totalAmountWagered = 0;
+    user.totalAmountWon = 0;
+    user.lastGameResult = null;
+    user.lastUpdated = new Date();
+
+    await user.save();
+
+    res.json({ 
+      success: true, 
+      message: 'User reset successfully',
+      user: {
+        walletAddress: user.walletAddress,
+        hasPlayedGame: user.hasPlayedGame,
+        totalGamesPlayed: user.totalGamesPlayed
+      }
+    });
+
+  } catch (error) {
+    console.error('Error resetting user:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error' 
+    });
+  }
+});
+
 // 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({ 

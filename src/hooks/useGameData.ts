@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GameResult, PlayerStats, GameStats, LeaderboardEntry } from '../types';
 import { contractService } from '../services/contractService';
+import { apiService } from '../services/apiService';
 import { useWeb3 } from '../contexts/Web3Context';
 import { REFRESH_INTERVAL } from '../utils/constants';
 
@@ -142,13 +143,16 @@ export const useGameActions = () => {
       throw new Error('Contract not initialized');
     }
 
-    if (!wallet.isConnected) {
+    if (!wallet.isConnected || !wallet.address) {
       throw new Error('Wallet not connected');
     }
 
     setIsFlipping(true);
     
     try {
+      // First, register that the user is playing (immediate feedback)
+      console.log('🎮 Player starting game:', wallet.address);
+      
       const result = await contractService.flipCoin(amount, choice);
       
       if (result.success) {
@@ -160,6 +164,24 @@ export const useGameActions = () => {
             // For now, we'll simulate it (in real implementation, parse from events)
             const coinResult = Math.random() < 0.5 ? 'heads' : 'tails';
             setLastResult(coinResult);
+            
+            // IMPORTANT: Always update backend after successful flip
+            try {
+              console.log('🎯 Directly updating backend after successful flip');
+              const betAmountNum = parseFloat(amount);
+              const won = coinResult === choice;
+              
+              const updateResult = await apiService.updateGameResult(
+                wallet.address!,
+                won ? 'win' : 'loss',
+                betAmountNum,
+                won ? betAmountNum * 2 : 0
+              );
+              
+              console.log('✅ Backend updated successfully:', updateResult);
+            } catch (apiError) {
+              console.error('❌ Failed to update backend directly:', apiError);
+            }
           }
         }
         
