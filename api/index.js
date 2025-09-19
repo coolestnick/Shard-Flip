@@ -25,31 +25,6 @@ const CACHE_KEYS = {
   USER_COUNT: 'user_counts'
 };
 
-// Rate limiting configuration
-const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: { success: false, message: 'Too many requests, please try again later' },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // limit each IP to 50 API calls per windowMs
-  message: { success: false, message: 'Too many API requests, please try again later' },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-
-const strictLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 10, // limit each IP to 10 game actions per minute
-  message: { success: false, message: 'Too many game requests, please wait before trying again' },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-
 // Middleware
 app.use(helmet());
 app.use(cors({
@@ -62,10 +37,6 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-
-// Apply rate limiting
-app.use(generalLimiter);
-app.use('/api', apiLimiter);
 
 // MongoDB Connection with optimized settings
 mongoose.connect(process.env.MONGODB_URI, {
@@ -153,21 +124,31 @@ const getCachedData = (key, fallbackFn, ttl = null) => {
       // Try to get from cache first
       const cached = cache.get(key);
       if (cached !== undefined) {
+        console.log(`📦 Cache hit for key: ${key}`);
         return resolve(cached);
       }
+
+      console.log(`🔍 Cache miss for key: ${key}, fetching from database...`);
 
       // If not in cache, fetch from database
       const data = await fallbackFn();
 
       // Store in cache with TTL
-      if (ttl) {
-        cache.set(key, data, ttl);
-      } else {
-        cache.set(key, data);
+      try {
+        if (ttl) {
+          cache.set(key, data, ttl);
+        } else {
+          cache.set(key, data);
+        }
+        console.log(`💾 Cached data for key: ${key}`);
+      } catch (cacheError) {
+        console.warn(`⚠️ Failed to cache data for key: ${key}`, cacheError);
+        // Don't fail the request if caching fails
       }
 
       resolve(data);
     } catch (error) {
+      console.error(`❌ Error in getCachedData for key: ${key}`, error);
       reject(error);
     }
   });
@@ -190,7 +171,7 @@ const validateSecretKey = (req, res, next) => {
 // POST Routes (Protected with secret key)
 
 // Register wallet
-app.post('/api/register-wallet', strictLimiter, validateSecretKey, async (req, res) => {
+app.post('/api/register-wallet', validateSecretKey, async (req, res) => {
   try {
     const { walletAddress } = req.body;
     
@@ -244,8 +225,7 @@ app.post('/api/register-wallet', strictLimiter, validateSecretKey, async (req, r
   }
 });
 
-// Update game result - OPTIMIZED FOR SPEED
-app.post('/api/update-game', strictLimiter, validateSecretKey, async (req, res) => {
+app.post('/api/update-game', validateSecretKey, async (req, res) => {
   try {
     const { walletAddress, gameResult, amountWagered, amountWon } = req.body;
 
@@ -321,10 +301,13 @@ app.post('/api/update-game', strictLimiter, validateSecretKey, async (req, res) 
     });
 
   } catch (error) {
-    console.error('Error updating game:', error);
+    console.error('❌ Error updating game:', error);
+    console.error('❌ Error stack:', error.stack);
+    console.error('❌ Request body:', req.body);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
@@ -536,7 +519,7 @@ app.get('/api/health', (_, res) => {
 });
 
 // Admin endpoint to reset user (temporary - for development)
-app.post('/api/admin/reset-user', strictLimiter, validateSecretKey, async (req, res) => {
+app.post('/api/admin/reset-user', validateSecretKey, async (req, res) => {
   try {
     const { walletAddress } = req.body;
     
@@ -595,13 +578,35 @@ app.use('*', (_, res) => {
   });
 });
 
-// Error handler
-app.use((err, _, res, __) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ 
-    success: false, 
-    message: 'Internal server error' 
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('🚨 Unhandled error:', err);
+  console.error('🚨 Error stack:', err.stack);
+  console.error('🚨 Request URL:', req.url);
+  console.error('🚨 Request method:', req.method);
+  console.error('🚨 Request body:', req.body);
+
+  // Don't send error if response was already sent
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  res.status(500).json({
+    success: false,
+    message: 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🚨 Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('🚨 Uncaught Exception:', error);
+  process.exit(1);
 });
 
 // Start server
