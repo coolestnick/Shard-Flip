@@ -134,9 +134,17 @@ export const useGameData = () => {
 };
 
 export const useGameActions = () => {
-  const { wallet, refreshBalance } = useWeb3();
+  const { wallet, provider, signer, refreshBalance } = useWeb3();
   const [isFlipping, setIsFlipping] = useState(false);
   const [lastResult, setLastResult] = useState<'heads' | 'tails' | null>(null);
+
+  // Initialize contract service when web3 is ready
+  useEffect(() => {
+    if (provider && signer) {
+      console.log('🔗 Initializing contract service for game actions...');
+      contractService.initialize(provider, signer);
+    }
+  }, [provider, signer]);
 
   const flipCoin = useCallback(async (amount: string, choice: 'heads' | 'tails') => {
     if (!contractService.isInitialized()) {
@@ -148,60 +156,75 @@ export const useGameActions = () => {
     }
 
     setIsFlipping(true);
-    
+
     try {
-      // First, register that the user is playing (immediate feedback)
-      console.log('🎮 Player starting game:', wallet.address);
-      
+      console.log('🎮 Attempting to flip coin with:', { amount, choice, wallet: wallet.address });
       const result = await contractService.flipCoin(amount, choice);
-      
+      console.log('🎯 Contract service result:', result);
+
       if (result.success) {
         // Wait for transaction confirmation and get result
         if (result.txHash) {
-          const confirmed = await contractService.waitForTransaction(result.txHash);
-          if (confirmed) {
-            // The actual result would come from contract events
-            // For now, we'll simulate it (in real implementation, parse from events)
-            const coinResult = Math.random() < 0.5 ? 'heads' : 'tails';
-            setLastResult(coinResult);
-            
-            // IMPORTANT: Always update backend after successful flip
-            try {
-              console.log('🎯 Directly updating backend after successful flip');
-              const betAmountNum = parseFloat(amount);
-              const won = coinResult === choice;
-              
-              const updateResult = await apiService.updateGameResult(
-                wallet.address!,
-                won ? 'win' : 'loss',
-                betAmountNum,
-                won ? betAmountNum * 2 : 0
-              );
-              
-              console.log('✅ Backend updated successfully:', updateResult);
-            } catch (apiError) {
-              console.error('❌ Failed to update backend directly:', apiError);
+          try {
+            const confirmed = await contractService.waitForTransaction(result.txHash);
+            if (confirmed) {
+              // The actual result would come from contract events
+              // For now, we'll simulate it (in real implementation, parse from events)
+              const coinResult = Math.random() < 0.5 ? 'heads' : 'tails';
+              setLastResult(coinResult);
+
+              // Update backend after successful flip
+              try {
+                const betAmountNum = parseFloat(amount);
+                const won = coinResult === choice;
+
+                await apiService.updateGameResult(
+                  wallet.address!,
+                  won ? 'win' : 'loss',
+                  betAmountNum,
+                  won ? betAmountNum * 2 : 0
+                );
+              } catch (apiError) {
+                console.error('Failed to update backend:', apiError);
+              }
             }
+          } catch (waitError) {
+            console.error('Error waiting for transaction:', waitError);
           }
         }
-        
+
         // Refresh balance after successful transaction
-        await refreshBalance();
-        
+        try {
+          await refreshBalance();
+        } catch (refreshError) {
+          console.error('Error refreshing balance:', refreshError);
+        }
+
         return result;
       } else {
+        console.error('❌ Contract service returned failure:', result.error);
         throw new Error(result.error || 'Transaction failed');
       }
+    } catch (error) {
+      console.error('Error in flipCoin:', error);
+      throw error;
     } finally {
       setIsFlipping(false);
     }
-  }, [wallet.isConnected, refreshBalance]);
+  }, [wallet.isConnected, wallet.address, refreshBalance]);
+
+  const forceResetFlipping = useCallback(() => {
+    console.log('🔄 Force resetting flipping state...');
+    setIsFlipping(false);
+    setLastResult(null);
+  }, []);
 
   return {
     flipCoin,
     isFlipping,
     lastResult,
-    clearLastResult: () => setLastResult(null)
+    clearLastResult: () => setLastResult(null),
+    forceResetFlipping
   };
 };
 

@@ -18,11 +18,13 @@ export class ContractService {
   initialize(provider: ethers.BrowserProvider, signer: ethers.JsonRpcSigner) {
     this.provider = provider;
     this.signer = signer;
+    console.log('🔗 Initializing contract with address:', SHARDEUM_UNSTABLE.contracts.shardFlip);
     this.contract = new ethers.Contract(
       SHARDEUM_UNSTABLE.contracts.shardFlip,
       CONTRACT_ABI,
       signer
     );
+    console.log('✅ Contract initialized successfully');
   }
 
   isInitialized(): boolean {
@@ -37,6 +39,13 @@ export class ContractService {
     try {
       const betAmount = ethers.parseEther(amount);
       const choiceBool = choice === 'heads'; // true for heads, false for tails
+
+      console.log('🔍 Checking contract deployment...');
+      const contractCode = await this.provider!.getCode(SHARDEUM_UNSTABLE.contracts.shardFlip);
+      if (contractCode === '0x') {
+        throw new Error('Contract not deployed at address: ' + SHARDEUM_UNSTABLE.contracts.shardFlip);
+      }
+      console.log('✅ Contract exists at address');
       
       // Store bet info for fallback update
       const betInfo = {
@@ -84,14 +93,22 @@ export class ContractService {
         gasLimit = BigInt(500000); // Fallback gas limit
       }
 
-      // Get current gas price
-      const gasPrice = await this.provider!.getFeeData();
-      
-      const tx = await this.contract!.flipCoin(choiceBool, {
+      // Get current gas price with fallback for networks that don't support EIP-1559
+      let txOptions: any = {
         value: betAmount,
-        gasLimit: gasLimit,
-        gasPrice: gasPrice.gasPrice
-      });
+        gasLimit: gasLimit
+      };
+
+      try {
+        const feeData = await this.provider!.getFeeData();
+        if (feeData.gasPrice) {
+          txOptions.gasPrice = feeData.gasPrice;
+        }
+      } catch (gasError) {
+        console.warn('Failed to get fee data, using default gas settings:', gasError);
+      }
+
+      const tx = await this.contract!.flipCoin(choiceBool, txOptions);
 
       toast.success('Transaction sent! Waiting for confirmation...');
       
@@ -177,8 +194,14 @@ export class ContractService {
       }
 
     } catch (error: any) {
-      console.error('Error flipping coin:', error);
-      
+      console.error('❌ Error flipping coin:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        code: error.code,
+        reason: error.reason,
+        data: error.data
+      });
+
       let errorMessage = 'Failed to flip coin';
       
       if (error.code === 'ACTION_REJECTED') {

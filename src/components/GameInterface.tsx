@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import CoinFlip, { CoinResult } from './CoinFlip';
 import { useWeb3 } from '../contexts/Web3Context';
 import { useGameActions } from '../hooks/useGameData';
@@ -10,12 +10,28 @@ import toast from 'react-hot-toast';
 
 const GameInterface: React.FC = () => {
   const { wallet } = useWeb3();
-  const { flipCoin, isFlipping, lastResult, clearLastResult } = useGameActions();
+  const { flipCoin, isFlipping, lastResult, clearLastResult, forceResetFlipping } = useGameActions();
   
   const [betAmount, setBetAmount] = useState<string>('0.1');
   const [selectedSide, setSelectedSide] = useState<CoinSide | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [lastWon, setLastWon] = useState(false);
+
+  // Auto-reset flipping state if stuck for too long
+  useEffect(() => {
+    if (isFlipping) {
+      console.log('⏱️ Starting auto-reset timer for flipping state...');
+      const timer = setTimeout(() => {
+        console.warn('⚠️ Flipping state stuck for 2 minutes, auto-resetting...');
+        forceResetFlipping();
+        toast.error('Transaction timed out - button reset automatically');
+      }, 120000); // 2 minutes
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [isFlipping, forceResetFlipping]);
 
   const handleBetAmountChange = (amount: string) => {
     setBetAmount(amount);
@@ -60,7 +76,7 @@ const GameInterface: React.FC = () => {
 
     try {
       const result = await flipCoin(betAmount, selectedSide);
-      
+
       if (result.success) {
         // Show result after flip animation completes
         setTimeout(() => {
@@ -90,10 +106,10 @@ const GameInterface: React.FC = () => {
     setSelectedSide(null);
   };
 
-  const canFlip = wallet.isConnected && 
-                  selectedSide && 
-                  betAmount && 
-                  parseFloat(betAmount) > 0 && 
+  const canFlip = wallet.isConnected &&
+                  selectedSide &&
+                  betAmount &&
+                  parseFloat(betAmount) > 0 &&
                   !isFlipping;
 
   return (
@@ -192,6 +208,23 @@ const GameInterface: React.FC = () => {
                 'FLIP COIN'
               )}
             </motion.button>
+
+            {/* Emergency Reset Button - only show when stuck in flipping state */}
+            {isFlipping && (
+              <motion.button
+                onClick={() => {
+                  console.log('🔧 Emergency reset button clicked');
+                  forceResetFlipping();
+                  toast.success('Button state reset!');
+                }}
+                className="w-full mt-3 py-2 px-4 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                🔄 Reset Stuck Button
+              </motion.button>
+            )}
           </motion.div>
         </div>
 

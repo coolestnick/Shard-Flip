@@ -136,7 +136,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
               <div className="flex items-center space-x-6 text-sm text-gray-400">
-                <span>&copy; 2024 Shard Flip</span>
+                <span>&copy; 2025 Shard Flip</span>
                 <a 
                   href="#" 
                   className="hover:text-neon-blue transition-colors"
@@ -201,7 +201,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </motion.div>
 
       {/* API Test Panel - Only show in development */}
-      {process.env.NODE_ENV === 'development' && <ApiTest />}
+      {/* {process.env.NODE_ENV === 'development' && <ApiTest />} */}
     </div>
   );
 };
