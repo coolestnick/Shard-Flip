@@ -53,7 +53,11 @@ const strictLimiter = rateLimit({
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || ['http://localhost:3000', 'https://shard-flip.vercel.app'],
+  origin: process.env.FRONTEND_URL || [
+    'http://localhost:3000',
+    'https://shard-flip.vercel.app',
+    'https://shard-flip-three.vercel.app'
+  ],
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
