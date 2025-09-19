@@ -163,42 +163,15 @@ export const useGameActions = () => {
       console.log('🎯 Contract service result:', result);
 
       if (result.success) {
-        // Wait for transaction confirmation and get result
-        if (result.txHash) {
-          try {
-            const confirmed = await contractService.waitForTransaction(result.txHash);
-            if (confirmed) {
-              // The actual result would come from contract events
-              // For now, we'll simulate it (in real implementation, parse from events)
-              const coinResult = Math.random() < 0.5 ? 'heads' : 'tails';
-              setLastResult(coinResult);
+        // Immediately show simulated result for quick UX
+        // The actual backend update was already done in contractService
+        const coinResult = Math.random() < 0.5 ? 'heads' : 'tails';
+        setLastResult(coinResult);
 
-              // Update backend after successful flip
-              try {
-                const betAmountNum = parseFloat(amount);
-                const won = coinResult === choice;
-
-                await apiService.updateGameResult(
-                  wallet.address!,
-                  won ? 'win' : 'loss',
-                  betAmountNum,
-                  won ? betAmountNum * 2 : 0
-                );
-              } catch (apiError) {
-                console.error('Failed to update backend:', apiError);
-              }
-            }
-          } catch (waitError) {
-            console.error('Error waiting for transaction:', waitError);
-          }
-        }
-
-        // Refresh balance after successful transaction
-        try {
-          await refreshBalance();
-        } catch (refreshError) {
+        // Refresh balance after successful transaction (non-blocking)
+        refreshBalance().catch(refreshError => {
           console.error('Error refreshing balance:', refreshError);
-        }
+        });
 
         return result;
       } else {

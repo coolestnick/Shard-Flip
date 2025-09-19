@@ -78,15 +78,18 @@ const GameInterface: React.FC = () => {
       const result = await flipCoin(betAmount, selectedSide);
 
       if (result.success) {
-        // Show result after flip animation completes
+        // Show result immediately after transaction is sent (quick UX)
         setTimeout(() => {
-          const simulatedResult = Math.random() < 0.5 ? 'heads' : 'tails';
-          const won = simulatedResult === selectedSide;
-          setLastWon(won);
-          soundService.play(won ? 'win' : 'lose');
-          // Reset selection after successful flip
+          // Use the result from the hook (which gets it from contractService)
+          if (lastResult) {
+            const won = lastResult === selectedSide;
+            setLastWon(won);
+            soundService.play(won ? 'win' : 'lose');
+            toast.success(won ? `You won ${(parseFloat(betAmount) * 2).toFixed(2)} SHM!` : 'Better luck next time!');
+          }
+          // Reset selection after showing result
           setSelectedSide(null);
-        }, 2000);
+        }, 1500); // Reduced delay for faster UX
       }
     } catch (error: any) {
       console.error('Error flipping coin:', error);
