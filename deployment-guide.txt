@@ -1,0 +1,178 @@
+SHARD FLIP - DEPLOYMENT DOCUMENTATION
+=====================================
+
+PROJECT OVERVIEW
+-----------------
+Shard Flip is a Web3 coin flip gaming dApp for Shardeum blockchain.
+
+Architecture:
+React Frontend (Vercel) ↔ Node.js API (Vercel) ↔ MongoDB (Digital Ocean)
+         ↓                        ↓
+MetaMask Web3 Integration    Smart Contract (Shardeum)
+
+CURRENT DEPLOYMENTS
+-------------------
+Frontend: https://shard-flip-three.vercel.app/
+API: https://shard-flip-jrid.vercel.app/api
+Database: Digital Ocean MongoDB
+
+FRONTEND DEPLOYMENT
+-------------------
+Platform: Vercel
+Tech Stack: React 18, TypeScript, Tailwind CSS, Ethers.js, Framer Motion
+
+Environment Variables:
+- REACT_APP_API_URL=https://shard-flip-jrid.vercel.app/api
+- REACT_APP_API_SECRET_KEY=my0suoer-secret-environment-key-for-api's-security
+
+Build Command: npm run build
+Output Directory: build
+
+BACKEND API DEPLOYMENT
+----------------------
+Platform: Vercel Serverless Functions
+Tech Stack: Node.js, Express.js, MongoDB, Mongoose
+
+Environment Variables:
+- MONGODB_URI=mongodb+srv://username:password@cluster.digitalocean.mongodb.net/database
+- API_SECRET_KEY=my0suoer-secret-environment-key-for-api's-security
+- NODE_ENV=production
+
+Dependencies:
+- express: ^4.18.2
+- mongoose: ^7.6.3
+- cors: ^2.8.5
+- helmet: ^7.1.0
+- dotenv: ^16.3.1
+- node-cache: ^5.1.2
+
+API ENDPOINTS
+-------------
+Health Check: GET /api/health
+User Data: GET /api/user/:walletAddress
+All Users: GET /api/users?page=1&limit=50
+Leaderboard: GET /api/leaderboard?type=wins&limit=20
+Statistics: GET /api/stats
+
+Protected Endpoints (require API key):
+Register Wallet: POST /api/register-wallet
+Update Game: POST /api/update-game
+Reset User: POST /api/admin/reset-user
+
+DATABASE CONFIGURATION
+-----------------------
+Provider: Digital Ocean MongoDB
+Connection: MongoDB Atlas-compatible
+Database Name: shard-game
+Collection: users
+
+Schema:
+- walletAddress: String (unique)
+- hasPlayedGame: Boolean
+- totalGamesPlayed: Number
+- totalWins: Number
+- totalLosses: Number
+- totalAmountWagered: Number
+- totalAmountWon: Number
+- lastGameResult: String
+- registeredAt: Date
+- lastUpdated: Date
+
+Indexes:
+- walletAddress (unique)
+- hasPlayedGame
+- totalWins (descending)
+- totalAmountWon (descending)
+- totalGamesPlayed (descending)
+- lastUpdated (descending)
+
+BLOCKCHAIN INTEGRATION
+----------------------
+Network: Shardeum Unstablenet
+Chain ID: 8080
+Token: SHM
+Smart Contract: Deployed on Shardeum
+
+Web3 Features:
+- MetaMask wallet connection
+- Transaction handling with optimistic updates
+- Real-time balance updates
+- On-chain coin flip game logic
+
+PERFORMANCE OPTIMIZATIONS
+--------------------------
+Backend:
+- In-memory caching with Node-Cache
+- MongoDB connection pooling (max 10 connections)
+- Atomic database operations
+- Optimized aggregation queries
+- Comprehensive error handling
+
+Frontend:
+- Optimistic UI updates
+- Framer Motion animations
+- React Context for state management
+- Hot toast notifications
+
+LOCAL DEVELOPMENT SETUP
+------------------------
+Prerequisites: Node.js 18+, npm, Git, MetaMask
+
+Frontend Setup:
+1. npm install
+2. Set REACT_APP_API_URL=http://localhost:3001/api
+3. npm start (runs on localhost:3000)
+
+Backend Setup:
+1. cd api && npm install
+2. Set MONGODB_URI and API_SECRET_KEY in .env
+3. npm start (runs on localhost:3001)
+
+SECURITY FEATURES
+-----------------
+- API key authentication for write operations
+- CORS configuration for domain restrictions
+- Helmet.js security headers
+- Input validation and sanitization
+- MongoDB authentication with IP whitelist
+- Secure Web3 wallet integration
+
+MONITORING & TROUBLESHOOTING
+-----------------------------
+Health Check: GET /api/health
+Error Logging: Comprehensive error tracking with stack traces
+Performance Metrics: Cache hit rates, response times
+
+Common Issues:
+- API calls failing: Check REACT_APP_API_URL
+- MongoDB connection: Verify MONGODB_URI
+- CORS errors: Update allowed origins
+- Build failures: Clear cache and reinstall dependencies
+
+DEPLOYMENT WORKFLOW
+-------------------
+1. Code push to GitHub
+2. Vercel auto-deployment triggers
+3. Frontend and API deploy simultaneously
+4. Environment variables loaded from Vercel dashboard
+5. Production deployment goes live
+
+VERSION CONTROL
+---------------
+Current Version: v1.0.0
+Features: Coin flip game, Web3 integration, leaderboards, optimized API
+
+Planned Updates:
+- Additional game modes
+- Enhanced analytics
+- Achievement system
+- Multi-chain support
+
+CONTACT & SUPPORT
+-----------------
+Repository: GitHub
+Documentation: This deployment guide
+Issues: GitHub Issues for bugs and features
+
+Last Updated: Current
+Status: Active Production Deployment
