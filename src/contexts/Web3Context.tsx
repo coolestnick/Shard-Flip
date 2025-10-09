@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ethers } from 'ethers';
 import { WalletState, NetworkConfig } from '../types';
-import { SHARDEUM_UNSTABLE } from '../utils/constants';
+import { ACTIVE_NETWORK } from '../utils/constants';
 import { apiService } from '../services/apiService';
 import toast from 'react-hot-toast';
 
@@ -65,7 +65,7 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: `0x${SHARDEUM_UNSTABLE.chainId.toString(16)}` }],
+        params: [{ chainId: `0x${ACTIVE_NETWORK.chainId.toString(16)}` }],
       });
       return true;
     } catch (switchError: any) {
@@ -75,14 +75,14 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [{
-              chainId: `0x${SHARDEUM_UNSTABLE.chainId.toString(16)}`,
-              chainName: SHARDEUM_UNSTABLE.name,
-              rpcUrls: [SHARDEUM_UNSTABLE.rpcUrl],
-              blockExplorerUrls: [SHARDEUM_UNSTABLE.explorerUrl],
+              chainId: `0x${ACTIVE_NETWORK.chainId.toString(16)}`,
+              chainName: ACTIVE_NETWORK.name,
+              rpcUrls: [ACTIVE_NETWORK.rpcUrl],
+              blockExplorerUrls: [ACTIVE_NETWORK.explorerUrl],
               nativeCurrency: {
-                name: SHARDEUM_UNSTABLE.currency.name,
-                symbol: SHARDEUM_UNSTABLE.currency.symbol,
-                decimals: SHARDEUM_UNSTABLE.currency.decimals
+                name: ACTIVE_NETWORK.currency.name,
+                symbol: ACTIVE_NETWORK.currency.symbol,
+                decimals: ACTIVE_NETWORK.currency.decimals
               }
             }]
           });
@@ -123,7 +123,7 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       const network = await newProvider.getNetwork();
       
       // Check if we're on the correct network
-      if (Number(network.chainId) !== SHARDEUM_UNSTABLE.chainId) {
+      if (Number(network.chainId) !== ACTIVE_NETWORK.chainId) {
         const switched = await switchNetwork();
         if (!switched) {
           setWallet(prev => ({ ...prev, isConnecting: false }));
@@ -225,8 +225,8 @@ export const Web3Provider: React.FC<Web3ProviderProps> = ({ children }) => {
       const newChainId = parseInt(chainId, 16);
       setWallet(prev => ({ ...prev, chainId: newChainId }));
       
-      if (newChainId !== SHARDEUM_UNSTABLE.chainId && wallet.isConnected) {
-        toast.error('Please switch to Shardeum Unstablenet');
+      if (newChainId !== ACTIVE_NETWORK.chainId && wallet.isConnected) {
+        toast.error(`Please switch to ${ACTIVE_NETWORK.name}`);
       }
     };
 

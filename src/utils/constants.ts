@@ -1,5 +1,23 @@
 import { NetworkConfig } from '../types';
 
+// Shardeum EVM Testnet (Mezame)
+export const SHARDEUM_TESTNET: NetworkConfig = {
+  chainId: 8119,
+  name: 'Shardeum EVM Testnet',
+  rpcUrl: 'https://api-mezame.shardeum.org',
+  explorerUrl: 'https://explorer-mezame.shardeum.org',
+  currency: {
+    name: 'Shardeum',
+    symbol: 'SHM',
+    decimals: 18
+  },
+  contracts: {
+    shardFlip: '0x798C6537cC8B924167B1250772eC4191D9668cb4',
+    token: '0x0000000000000000000000000000000000000000'
+  }
+};
+
+// Legacy Unstablenet (deprecated)
 export const SHARDEUM_UNSTABLE: NetworkConfig = {
   chainId: 8080,
   name: 'Shardeum Unstablenet',
@@ -16,7 +34,10 @@ export const SHARDEUM_UNSTABLE: NetworkConfig = {
   }
 };
 
-export const SUPPORTED_NETWORKS = [SHARDEUM_UNSTABLE];
+export const SUPPORTED_NETWORKS = [SHARDEUM_TESTNET];
+
+// Export the active network (change this to switch networks)
+export const ACTIVE_NETWORK = SHARDEUM_TESTNET;
 
 export const DEFAULT_BET_AMOUNTS = ['0.01', '0.1', '0.5', '1'];
 

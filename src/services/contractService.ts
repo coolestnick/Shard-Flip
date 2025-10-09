@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { GameResult, PlayerStats, GameStats, LeaderboardEntry, CoinSide } from '../types';
-import { CONTRACT_ABI, SHARDEUM_UNSTABLE } from '../utils/constants';
+import { CONTRACT_ABI, ACTIVE_NETWORK } from '../utils/constants';
 import { apiService } from './apiService';
 import toast from 'react-hot-toast';
 
@@ -18,9 +18,9 @@ export class ContractService {
   initialize(provider: ethers.BrowserProvider, signer: ethers.JsonRpcSigner) {
     this.provider = provider;
     this.signer = signer;
-    console.log('🔗 Initializing contract with address:', SHARDEUM_UNSTABLE.contracts.shardFlip);
+    console.log('🔗 Initializing contract with address:', ACTIVE_NETWORK.contracts.shardFlip);
     this.contract = new ethers.Contract(
-      SHARDEUM_UNSTABLE.contracts.shardFlip,
+      ACTIVE_NETWORK.contracts.shardFlip,
       CONTRACT_ABI,
       signer
     );
@@ -41,9 +41,9 @@ export class ContractService {
       const choiceBool = choice === 'heads'; // true for heads, false for tails
 
       console.log('🔍 Checking contract deployment...');
-      const contractCode = await this.provider!.getCode(SHARDEUM_UNSTABLE.contracts.shardFlip);
+      const contractCode = await this.provider!.getCode(ACTIVE_NETWORK.contracts.shardFlip);
       if (contractCode === '0x') {
-        throw new Error('Contract not deployed at address: ' + SHARDEUM_UNSTABLE.contracts.shardFlip);
+        throw new Error('Contract not deployed at address: ' + ACTIVE_NETWORK.contracts.shardFlip);
       }
       console.log('✅ Contract exists at address');
       

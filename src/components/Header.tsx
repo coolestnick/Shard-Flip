@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWeb3 } from '../contexts/Web3Context';
-import { SHARDEUM_UNSTABLE } from '../utils/constants';
+import { ACTIVE_NETWORK } from '../utils/constants';
 import { soundService } from '../services/soundService';
 
 const Header: React.FC = () => {
@@ -17,7 +17,7 @@ const Header: React.FC = () => {
     return parseFloat(balance).toFixed(4);
   };
 
-  const isWrongNetwork = wallet.chainId !== null && wallet.chainId !== SHARDEUM_UNSTABLE.chainId;
+  const isWrongNetwork = wallet.chainId !== null && wallet.chainId !== ACTIVE_NETWORK.chainId;
 
   const toggleSound = () => {
     const newState = !soundEnabled;
@@ -192,7 +192,7 @@ const Header: React.FC = () => {
                       <div className="py-2 space-y-1">
                         {/* View on Explorer Button */}
                         <motion.a
-                          href={`${SHARDEUM_UNSTABLE.explorerUrl}/address/${wallet.address}`}
+                          href={`${ACTIVE_NETWORK.explorerUrl}/address/${wallet.address}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="group relative mx-2 block"
@@ -301,7 +301,7 @@ const Header: React.FC = () => {
                             
                             <motion.button
                               onClick={() => {
-                                window.open(`${SHARDEUM_UNSTABLE.explorerUrl}/address/${wallet.address}`, '_blank');
+                                window.open(`${ACTIVE_NETWORK.explorerUrl}/address/${wallet.address}`, '_blank');
                                 setShowDropdown(false);
                               }}
                               className="flex-1 flex items-center justify-center space-x-1 py-2 px-2 rounded-lg bg-neon-purple/10 hover:bg-neon-purple/20 border border-neon-purple/20 hover:border-neon-purple/40 transition-all duration-200 group"
