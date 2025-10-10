@@ -54,16 +54,10 @@ export class ContractService {
         player: this.signer ? await this.signer.getAddress() : null
       };
 
-      // Check minimum bet amount
-      const minBet = await this.contract!.MIN_BET();
-      if (betAmount < minBet) {
-        throw new Error(`Minimum bet is ${ethers.formatEther(minBet)} SHM`);
-      }
-
-      // Check maximum bet amount
-      const maxBet = await this.contract!.MAX_BET();
-      if (betAmount > maxBet) {
-        throw new Error(`Maximum bet is ${ethers.formatEther(maxBet)} SHM`);
+      // Validate bet amount against allowed tiers
+      const allowedBets = ['1000', '1500', '2000', '3000'];
+      if (!allowedBets.includes(amount)) {
+        throw new Error(`Invalid bet amount. Please use: ${allowedBets.join(', ')} SHM`);
       }
 
       // Check contract balance for potential payout

@@ -12,7 +12,7 @@ export const SHARDEUM_TESTNET: NetworkConfig = {
     decimals: 18
   },
   contracts: {
-    shardFlip: '0x798C6537cC8B924167B1250772eC4191D9668cb4',
+    shardFlip: '0x7de88096d0AaAB4C9323C0cDFD21ff2Eec64EeC0',
     token: '0x0000000000000000000000000000000000000000'
   }
 };
@@ -39,7 +39,7 @@ export const SUPPORTED_NETWORKS = [SHARDEUM_TESTNET];
 // Export the active network (change this to switch networks)
 export const ACTIVE_NETWORK = SHARDEUM_TESTNET;
 
-export const DEFAULT_BET_AMOUNTS = ['0.01', '0.1', '0.5', '1'];
+export const DEFAULT_BET_AMOUNTS = ['1000', '1500', '2000', '3000'];
 
 export const REFRESH_INTERVAL = 30000; // 30 seconds
 
@@ -301,6 +301,38 @@ export const CONTRACT_ABI = [
   {
     "inputs": [],
     "name": "getContractBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAllowedBets",
+    "outputs": [
+      {
+        "internalType": "uint256[4]",
+        "name": "",
+        "type": "uint256[4]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "allowedBets",
     "outputs": [
       {
         "internalType": "uint256",

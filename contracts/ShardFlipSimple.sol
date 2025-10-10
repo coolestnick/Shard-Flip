@@ -17,9 +17,15 @@ contract ShardFlip {
     uint256 public totalActiveUsers;
     
     // Game constants
-    uint256 public constant MIN_BET = 0.01 ether;
-    uint256 public constant MAX_BET = 10 ether;
     uint256 public constant PAYOUT_MULTIPLIER = 2;
+
+    // Allowed bet tiers in SHM (wei)
+    uint256[4] public allowedBets = [
+        1000 ether,  // 1000 SHM
+        1500 ether,  // 1500 SHM
+        2000 ether,  // 2000 SHM
+        3000 ether   // 3000 SHM
+    ];
     
     // Structs
     struct GameResult {
@@ -84,8 +90,14 @@ contract ShardFlip {
     }
     
     modifier validBetAmount() {
-        require(msg.value >= MIN_BET, "Bet amount too low");
-        require(msg.value <= MAX_BET, "Bet amount too high");
+        bool isValidBet = false;
+        for (uint256 i = 0; i < allowedBets.length; i++) {
+            if (msg.value == allowedBets[i]) {
+                isValidBet = true;
+                break;
+            }
+        }
+        require(isValidBet, "Invalid bet amount. Use 1000, 1500, 2000, or 3000 SHM");
         _;
     }
     
@@ -349,6 +361,13 @@ contract ShardFlip {
      */
     function getContractBalance() external view returns (uint256) {
         return address(this).balance;
+    }
+
+    /**
+     * @dev Get allowed bet amounts
+     */
+    function getAllowedBets() external view returns (uint256[4] memory) {
+        return allowedBets;
     }
     
     /**

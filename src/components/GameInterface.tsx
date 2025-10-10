@@ -12,7 +12,7 @@ const GameInterface: React.FC = () => {
   const { wallet } = useWeb3();
   const { flipCoin, isFlipping, lastResult, clearLastResult, forceResetFlipping } = useGameActions();
   
-  const [betAmount, setBetAmount] = useState<string>('0.1');
+  const [betAmount, setBetAmount] = useState<string>('1000');
   const [selectedSide, setSelectedSide] = useState<CoinSide | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [lastWon, setLastWon] = useState(false);
@@ -275,7 +275,7 @@ const GameInterface: React.FC = () => {
                   type="text"
                   value={betAmount}
                   onChange={handleCustomAmountChange}
-                  placeholder="0.1"
+                  placeholder="1000"
                   className="w-full bg-gaming-light border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-neon-blue focus:ring-1 focus:ring-neon-blue transition-colors"
                 />
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
@@ -309,12 +309,8 @@ const GameInterface: React.FC = () => {
                 <span className="text-white">0%</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Min Bet</span>
-                <span className="text-white">0.01 SHM</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Max Bet</span>
-                <span className="text-white">10 SHM</span>
+                <span className="text-gray-400">Allowed Bets</span>
+                <span className="text-white">1000, 1500, 2000, 3000 SHM</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-400">Your Balance</span>
