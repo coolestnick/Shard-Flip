@@ -15,6 +15,9 @@
     "mongoose": "^8.0.0",
     "node-cache": "^5.1.2"
   },
+  "comments": {
+    "note": "express-rate-limit removed - no rate limiting applied"
+  },
   "devDependencies": {
     "nodemon": "^3.0.1"
   },
