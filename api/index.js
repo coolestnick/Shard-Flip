@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const NodeCache = require('node-cache');
-const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
